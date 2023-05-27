@@ -1,0 +1,60 @@
+//Stage 1:
+module RegFile(addr1,addr2,writedata,memread,memwrite,RD_1,RD_2,clk,s1,s2,k);
+ input [2:0]k;// scaler constant, to be used in stage 2
+input s1;//the selection line of the 2-1 mux in stage 2
+input [1:0]s2;//selection line of the 4-1 mux in stage 3
+input clk;
+input wire[8:0] addr2,addr1;
+input wire[32:0]writedata;
+input wire memwrite,memread;
+output reg [32:0] RD_1,RD_2;
+reg [32:0] RAM[0:512];
+integer i;
+initial begin 
+for(i=0;i<512;i=i+1)
+RAM[i]=i*i;
+end
+  always@(posedge clk) 
+begin
+if(memwrite==1'b1)
+RAM[addr1]<= writedata;
+else
+//Assigning the values of the registers according to the address recieved:
+RD_2<=RAM[addr2];
+RD_1<=RAM[addr1];
+end 
+//Stage 2 module will be called here
+endmodule
+
+
+//Stage 1 Test:
+module test;
+reg [2:0]k;
+reg[8:0]addr2,addr1;
+reg[32:0]writedata;
+reg memwrite,memread;
+reg clk=0;
+wire [32:0]RD1,RD2;
+//note: k,s1,s2, and writedata signals will have random values just for testing
+RegFile dm(addr1,addr2,writedata,memread,memwrite,RD1,RD2,clk,1'b0,2'b1,k);
+always #1 clk=~clk;
+initial
+begin
+
+  $dumpfile("dump.vcd");
+  $dumpvars(1);
+  
+k=2;
+addr1=1;
+writedata=8'b00010011;
+memwrite=0;
+memread=1;
+addr2=511;
+#2 $display("RD1 = %b\nRD2 = %b\n",RD1,RD2);
+k=2;
+addr1=70;
+addr2=200;
+#2 $display("RD1 = %b\nRD2 = %b\n",RD1,RD2);
+$finish;
+end
+endmodule

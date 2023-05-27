@@ -1,0 +1,45 @@
+//stage 3
+module EX2(A_R,M_R,s2,out,clk);
+input [63:0]A_R,M_R;//inputs passed from arithmetic results in stage2
+input clk;//system clock
+input [1:0]s2;
+output reg [127:0]out;
+always @(posedge clk)
+begin 
+case (s2)//mux implementation
+0:out <= A_R;
+1:out <= M_R*M_R;
+2:out<= M_R;
+endcase
+end
+endmodule
+
+module Stage3Test;
+reg [63:0]A_R,M_R;
+reg [1:0]s2;
+wire [127:0]out;
+reg clk=0;
+
+always #1 clk=~clk;
+
+EX2 ee(A_R,M_R,s2,out,clk);
+initial begin
+  $dumpfile("dump.vcd"); //commands for generating the waveform
+  $dumpvars(1);
+A_R<=790;
+M_R<=200;
+s2=0;
+#1$display("output = ",out);
+#1$display("output = ",out);
+s2=1;
+#2$display("output = ",out);
+s2=2;
+#2$display("output = ",out);
+
+
+
+$finish;
+end
+endmodule
+
+

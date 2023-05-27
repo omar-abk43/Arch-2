@@ -1,0 +1,55 @@
+//Stage 4: write back
+module RegFile_WR(addr,writedata,memwrite,readdata,clk);
+input [8:0] addr;//address to write on
+input clk;//system clock
+input [127:0]writedata;//written data
+input  memwrite;
+output reg [127:0] readdata;
+reg [127:0] RAM[511:0];
+always @(negedge clk) begin
+if(memwrite==1'b1)
+RAM[addr]<= writedata;
+else  readdata=RAM[addr];
+end 
+endmodule
+
+module Stage4Test;
+reg [8:0]addr;
+reg [127:0]WR_data;
+reg memwrite;
+wire [127:0]readdata;
+reg clk=0;
+always #1 clk=~clk;//clock duration is 2 time units
+RegFile_WR ww(addr,WR_data,memwrite,readdata,clk);
+initial begin
+
+  $dumpfile("dump.vcd"); //commands for generating the waveform
+  $dumpvars(1);
+  
+addr=0;
+WR_data=10890;
+memwrite = 1;
+#2$display("data written on address ",addr,": ",WR_data);
+addr=5;
+WR_data=15000;
+#2$display("data written on address ",addr,": ",WR_data);
+addr=50;
+WR_data=25010;
+#2$display("data written on address ",addr,": ",WR_data);
+addr=500;
+WR_data=20000;
+#2$display("data written on address ",addr,": ",WR_data);
+
+memwrite=0;
+addr=0;
+#2$display("\ndata read from from address ",addr,": ",readdata);
+addr=5;
+#2$display("data read from from address ",addr,": ",readdata);
+addr=50;
+#2$display("data read from from address ",addr,": ",readdata);
+addr=500;
+#2$display("data read from from address ",addr,": ",readdata);
+
+$finish;
+end
+endmodule
